@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+  <meta name="referrer" content="no-referrer">
+  <title>🍱 辦公室美食菜單看板</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-alt: #f0f2f5;
+      --primary: #e85d04;
+      --primary-hover: #d04f00;
+      --primary-soft: #fff3eb;
+      --teal: #0d9488;
+      --teal-soft: #e6fffa;
+      --green: #16a34a;
+      --green-soft: #dcfce7;
+      --amber: #d97706;
+      --amber-soft: #fef3c7;
+      --red: #dc2626;
+      --red-soft: #fee2e2;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 60px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      color: #fff;
+      padding: 20px 16px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .topbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand p {
+      font-size: 0.84rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 15px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.16s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.24);
+    }
+    .btn-glass:hover:not(:disabled) { background: rgba(255, 255, 255, 0.24); }
+    .btn-outline {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-outline:hover:not(:disabled) { background: var(--surface-alt); }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-success:hover:not(:disabled) { background: #15803d; }
+    .btn-success-soft {
+      background: var(--green-soft);
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+    .btn-success-soft:hover:not(:disabled) { background: #bbf7d0; }
+    .btn-danger-soft {
+      background: var(--red-soft);
+      color: var(--red);
+      border-color: #fecaca;
+    }
+    .btn-danger-soft:hover:not(:disabled) { background: #fecaca; }
+    .btn-sm { padding: 6px 11px; font-size: 0.82rem; border-radius: 8px; }
+
+    .controls-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(246, 247, 249, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+    }
+    .controls-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .search-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .search-box {
+      flex: 1;
+      min-width: 210px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 36px 10px 38px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px;
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-box input:focus { border-color: var(--primary); }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .clear-search {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 1rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: none;
+    }
+    .sort-select {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+    }
+
+    .tabs-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .tabs-row::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { color: var(--text); border-color: #cbd5e1; }
+    .tab-btn.active {
+      background: #1e293b;
+      color: #fff;
+      border-color: #1e293b;
+    }
+    .tab-btn.stale-tab.active {
+      background: var(--red);
+      border-color: var(--red);
+    }
+    .tab-count {
+      background: rgba(148, 163, 184, 0.22);
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+    }
+    .tab-btn.active .tab-count { background: rgba(255, 255, 255, 0.22); color: #fff; }
+
+    .container {
+      max-width: 1200px;
+      margin: 18px auto 0;
+      padding: 0 16px;
+    }
+    .stale-banner {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 11px 15px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .store-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .store-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      cursor: pointer;
+    }
+    .store-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .store-card.is-stale { border-color: #fcd34d; }
+
+    .card-thumb {
+      height: 168px;
+      background: #e2e8f0;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.25s ease;
+    }
+    .store-card:hover .card-thumb img { transform: scale(1.03); }
+    .no-thumb {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      gap: 4px;
+    }
+    .no-thumb span { font-size: 2.2rem; }
+
+    .thumb-badges {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      backdrop-filter: blur(6px);
+    }
+    .badge-food { background: rgba(255, 243, 235, 0.95); color: #c2410c; }
+    .badge-drink { background: rgba(230, 255, 250, 0.95); color: #0f766e; }
+    .badge-photo-count { background: rgba(15, 23, 42, 0.72); color: #fff; }
+
+    .card-body {
+      padding: 14px 15px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .rating-pill {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #b45309;
+      background: #fef3c7;
+      padding: 2px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      align-items: center;
+    }
+    .phone-link {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .phone-link:hover { text-decoration: underline; }
+
+    .freshness-bar {
+      margin-top: 2px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .fresh-ok { background: var(--green-soft); color: #166534; }
+    .fresh-stale { background: var(--red-soft); color: #991b1b; }
+
+    .items-preview {
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .item-chip {
+      background: var(--surface-alt);
+      padding: 2px 8px;
+      border-radius: 6px;
+      color: var(--text);
+    }
+    .item-chip.highlight {
+      background: #fef08a;
+      color: #854d0e;
+      font-weight: 700;
+    }
+
+    .card-footer {
+      padding: 10px 15px;
+      background: #fafbfc;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .state-box {
+      text-align: center;
+      padding: 64px 20px;
+      color: var(--text-muted);
+    }
+    .spinner {
+      width: 38px;
+      height: 38px;
+      border: 4px solid #e2e8f0;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.58);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      overflow-y: auto;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      width: 100%;
+      max-width: 820px;
+      max-height: 90vh;
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #f8fafc;
+    }
+    .modal-header h2 { font-size: 1.2rem; font-weight: 800; }
+    .close-btn {
+      background: var(--surface-alt);
+      border: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .modal-body {
+      padding: 18px 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-footer {
+      padding: 13px 20px;
+      border-top: 1px solid var(--border);
+      background: #f8fafc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .detail-status-bar {
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .photo-strip {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+    }
+    .photo-item {
+      position: relative;
+      flex: 0 0 210px;
+      height: 145px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+    }
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: zoom-in;
+    }
+    .photo-del-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(220, 38, 38, 0.88);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 3px 7px;
+      font-size: 0.74rem;
+      cursor: pointer;
+    }
+
+    .category-group { margin-bottom: 18px; }
+    .category-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 2px solid var(--primary-soft);
+    }
+    .menu-items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+    }
+    .menu-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--surface-alt);
+      border-radius: 8px;
+      font-size: 0.92rem;
+      gap: 8px;
+    }
+    .menu-row.match { background: #fef08a; }
+    .menu-price {
+      font-weight: 700;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .edit-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    .edit-table th {
+      text-align: left;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .edit-table td { padding: 5px 4px; }
+    .edit-table input {
+      width: 100%;
+      padding: 7px 9px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 15px;
+    }
+
+    .dropzone {
+      border: 2px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 24px 16px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      margin-bottom: 14px;
+    }
+    .dropzone:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .preview-img {
+      max-height: 200px;
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+      display: none;
+    }
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .radio-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.88rem;
+    }
+    .radio-card input { margin-top: 3px; }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.93);
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 96vw;
+      max-height: 82vh;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+    .lightbox-bar {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      color: #fff;
+      font-size: 0.88rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #fff;
+      padding: 11px 18px;
+      border-radius: 10px;
+      box-shadow: var(--shadow-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 300;
+      display: none;
+      max-width: 92vw;
+      text-align: center;
+    }
+    .toast.show { display: block; }
+
+    @media (max-width: 640px) {
+      .topbar-inner { flex-direction: column; align-items: flex-start; }
+      .store-grid { grid-template-columns: 1fr; }
+      .modal { max-height: 93vh; border-radius: 14px; }
+      .menu-items-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <h1>🍱 辦公室美食菜單看板</h1>
+        <p>瀏覽高清菜單原圖、即時搜尋品項價格、半年防漲價核實管理</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-primary" onclick="openUploadModal()">📸 上傳 / 新增菜單</button>
+        <button class="btn btn-glass" onclick="loadBoard(true)">🔄 同步雲端最新</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="controls-wrap">
+    <div class="controls-inner">
+      <div class="search-row">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="搜尋店名、想吃的品項（如：雞腿、珍奶）或電話..." oninput="onSearchInput()">
+          <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()">✕</button>
+        </div>
+        <select class="sort-select" id="sortSelect" onchange="resetAndRenderGrid()">
+          <option value="name">排序：依店名</option>
+          <option value="stale">排序：最久未核實優先（查漲價）</option>
+          <option value="rating">排序：依評分高低</option>
+        </select>
+      </div>
+      <div class="tabs-row">
+        <button class="tab-btn active" data-tab="all" onclick="setTab('all')">全部店家 <span class="tab-count" id="cnt-all">0</span></button>
+        <button class="tab-btn" data-tab="food" onclick="setTab('food')">🍱 一般餐廳 <span class="tab-count" id="cnt-food">0</span></button>
+        <button class="tab-btn" data-tab="drink" onclick="setTab('drink')">🥤 飲料店 <span class="tab-count" id="cnt-drink">0</span></button>
+        <button class="tab-btn stale-tab" data-tab="stale" onclick="setTab('stale')">⚠️ 待核實 (&gt;180天) <span class="tab-count" id="cnt-stale">0</span></button>
+      </div>
+    </div>
+  </section>
+
+  <main class="container">
+    <div class="stale-banner" id="staleBanner">
+      <span id="staleBannerText"></span>
+      <button class="btn btn-sm btn-outline" onclick="setTab('stale')">查看待核實名單</button>
+    </div>
+
+    <div id="loadingBox" class="state-box" style="display:none;">
+      <div class="spinner"></div>
+      <p>正在同步試算表與雲端菜單資料...</p>
+    </div>
+
+    <div id="emptyBox" class="state-box" style="display:none;">
+      <p style="font-size:2.2rem;margin-bottom:8px;">🍽️</p>
+      <p id="emptyText">找不到符合條件的店家或品項</p>
+    </div>
+
+    <div id="storeGrid" class="store-grid"></div>
+    <div id="scrollSentinel" style="height:24px;"></div>
+  </main>
+
+  <!-- Store Detail / Edit Modal -->
+  <div class="modal-backdrop" id="detailModal" onclick="backdropClose(event, 'detailModal')">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="detailTitle">店家菜單</h2>
+        <button class="close-btn" onclick="closeModal('detailModal')">✕</button>
+      </div>
+      <div class="modal-body" id="detailBody"></div>
+      <div class="modal-footer" id="detailFooter"></div>
+    </div>
+  </div>
+
+  <!-- Upload / Create Store Modal -->
+  <div class="modal-backdrop" id="uploadModal" onclick="backdropClose(event, 'uploadModal')">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2 id="uploadModalTitle">📸 上傳菜單圖片 / 新增店家</h2>
+        <button class="close-btn" onclick="closeModal('uploadModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button class="btn btn-sm btn-primary" id="upTabPhoto" onclick="switchUploadMode('photo')">📸 傳照片 (AI 自動建檔/更新)</button>
+          <button class="btn btn-sm btn-outline" id="upTabManual" onclick="switchUploadMode('manual')">✍️ 手動新增空白店家</button>
+        </div>
+
+        <div id="uploadPhotoPane">
+          <div class="field" style="margin-bottom:12px;">
+            <label>店家名稱（若留空，AI 會自動從菜單圖片辨識店名）</label>
+            <input type="text" id="uploadStoreName" placeholder="例如：丹丹漢堡、50嵐...">
+          </div>
+
+          <div class="dropzone" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+            <p style="font-weight:700;color:var(--text);">點擊選擇菜單照片 或 手機直接拍照</p>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">支援 JPG / PNG，系統會自動最佳化畫質並存入 Google 雲端硬碟</p>
+            <img id="uploadPreview" class="preview-img" alt="預覽">
+          </div>
+
+          <div class="radio-group">
+            <label class="radio-card">
+              <input type="radio" name="uploadActionMode" value="ai_replace" checked>
+              <div>
+                <strong>🔄 AI 辨識並覆蓋同名舊菜單（推薦：店家漲價更新時使用）</strong>
+                <div style="color:var(--text-muted);font-size:0.8rem;">自動清除舊價格、寫入最新品項價格，並標記今日已核實</div>
+              </div>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="uploadActionMode" value="ai_append">
+              <div>
+                <strong>➕ AI 辨識並追加品項（同一間店有第 2 張菜單時使用）</strong>
+                <div style="color:var(--text-muted);font-size:0.8rem;">保留該店現有品項，將這張圖辨識出的品項接續加上去</div>
+              </div>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="uploadActionMode" value="image_only">
+              <div>
+                <strong>🖼️ 僅上傳菜單圖片（不更動文字價目表）</strong>
+                <div style="color:var(--text-muted);font-size:0.8rem;">只把照片存進雲端硬碟供網站檢視，並標記今日核實</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div id="uploadManualPane" style="display:none;">
+          <div class="form-grid">
+            <div class="field">
+              <label>店家名稱 *</label>
+              <input type="text" id="manualStoreName" placeholder="必填，例如：阿英排骨飯">
+            </div>
+            <div class="field">
+              <label>店家類型</label>
+              <select id="manualStoreType">
+                <option value="一般餐廳">🍱 一般餐廳</option>
+                <option value="飲料店">🥤 飲料店</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>訂購電話</label>
+              <input type="text" id="manualStorePhone" placeholder="選填，例如：06-2345678">
+            </div>
+          </div>
+          <p style="font-size:0.84rem;color:var(--text-muted);">建立後會直接開啟編輯視窗，讓您輸入品項與價格。</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span id="uploadHint" style="font-size:0.84rem;color:var(--text-muted);"></span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="closeModal('uploadModal')">取消</button>
+          <button class="btn btn-primary" id="uploadSubmitBtn" onclick="submitUploadModal()">開始上傳處理</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Image Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <img id="lightboxImg" referrerpolicy="no-referrer" src="" alt="菜單原圖">
+    <div class="lightbox-bar">
+      <button class="btn btn-sm btn-glass" id="lbPrevBtn" onclick="stepLightbox(-1)">◀ 上一張</button>
+      <span id="lbCaption"></span>
+      <button class="btn btn-sm btn-glass" id="lbNextBtn" onclick="stepLightbox(1)">下一張 ▶</button>
+      <button class="btn btn-sm btn-glass" onclick="document.getElementById('lightbox').classList.remove('open')">✕ 關閉原圖</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzFO_wJmORiAy5Ca09COoX6oWDm9UQfu464_yTphW5C9fXurWBcykmme1C5HQJ2CVH9NA/exec';
+    const LOCAL_STORAGE_KEY = 'OFFICE_LUNCH_BOARD_V1';
+    const INITIAL_BOARD_DATA = /*__INITIAL_BOARD_DATA__*/null;
+    const IS_GAS_IFRAME = (typeof google !== 'undefined' && google.script && google.script.run);
+
+    let allStores = [];
+    let filteredStoresCache = [];
+    let renderedCount = 0;
+    const PAGE_BATCH_SIZE = 24;
+
+    let staleThreshold = 180;
+    let currentTab = 'all';
+    let searchQuery = '';
+    let activeStoreName = null;
+    let isEditMode = false;
+    let editItemsDraft = [];
+    let selectedImageBase64 = null;
+    let selectedImageMime = 'image/jpeg';
+    let uploadPaneMode = 'photo';
+    let lbImages = [];
+    let lbIndex = 0;
+
+    // 統一雙模式通訊層：支援獨立靜態網站 (fetch) 與 GAS 內建模式 (google.script.run)
+    async function backendFetchBoard(forceRefresh) {
+      if (IS_GAS_IFRAME) {
+        return new Promise((resolve, reject) => {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)
+            .apiGetMenuBoardData(!!forceRefresh);
+        });
+      }
+      const qs = '?api=board' + (forceRefresh ? '&refresh=1&t=' + Date.now() : '&t=' + Math.floor(Date.now() / 60000));
+      const resp = await fetch(GAS_API_URL + qs, { method: 'GET', credentials: 'omit' });
+      const data = await resp.json();
+      if (!data || data.ok === false) {
+        throw new Error((data && data.error) || '讀取菜單資料失敗');
+      }
+      return data;
+    }
+
+    async function backendPostAction(webAction, payload) {
+      if (IS_GAS_IFRAME) {
+        const fnMap = {
+          verifyStore: p => google.script.run.withSuccessHandler( p._res ).withFailureHandler( p._rej ).apiVerifyStore(p.storeName),
+          saveStoreMenu: p => google.script.run.withSuccessHandler( p._res ).withFailureHandler( p._rej ).apiSaveStoreMenu(p),
+          uploadMenuImage: p => google.script.run.withSuccessHandler( p._res ).withFailureHandler( p._rej ).apiUploadMenuImage(p),
+          deleteStore: p => google.script.run.withSuccessHandler( p._res ).withFailureHandler( p._rej ).apiDeleteStore(p),
+          deleteDriveImage: p => google.script.run.withSuccessHandler( p._res ).withFailureHandler( p._rej ).apiDeleteDriveImage(p.fileId)
+        };
+        return new Promise((resolve, reject) => {
+          const arg = Object.assign({}, payload, { _res: resolve, _rej: reject });
+          fnMap[webAction](arg);
+        });
+      }
+
+      const resp = await fetch(GAS_API_URL, {
+        method: 'POST',
+        credentials: 'omit',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ webAction: webAction, payload: payload || {} })
+      });
+      const data = await resp.json();
+      if (!data || data.ok === false) {
+        throw new Error((data && data.error) || '操作失敗');
+      }
+      return data;
+    }
+
+    function saveLocalCache(boardRes) {
+      try {
+        if (boardRes && boardRes.ok && Array.isArray(boardRes.stores)) {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(boardRes));
+        }
+      } catch (e) { /* ignore quota */ }
+    }
+
+    function loadLocalCache() {
+      try {
+        const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setupInfiniteScroll();
+      if (INITIAL_BOARD_DATA && INITIAL_BOARD_DATA.ok) {
+        applyBoardData(INITIAL_BOARD_DATA);
+        saveLocalCache(INITIAL_BOARD_DATA);
+        return;
+      }
+
+      // 優先秒讀手機/瀏覽器本機快取（0.02 秒瞬開），背景靜默同步雲端最新狀態！
+      const localCached = loadLocalCache();
+      if (localCached && localCached.ok && localCached.stores && localCached.stores.length > 0) {
+        applyBoardData(localCached);
+        backendFetchBoard(false).then(fresh => {
+          saveLocalCache(fresh);
+          if (!isEditMode) applyBoardData(fresh);
+        }).catch(() => {});
+      } else {
+        loadBoard(false);
+      }
+    });
+
+    function setupInfiniteScroll() {
+      const sentinel = document.getElementById('scrollSentinel');
+      if (!('IntersectionObserver' in window) || !sentinel) return;
+      const obs = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && renderedCount < filteredStoresCache.length) {
+          appendMoreCards();
+        }
+      }, { rootMargin: '300px' });
+      obs.observe(sentinel);
+    }
+
+    function showToast(msg, duration = 3200) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.remove('show'), duration);
+    }
+
+    function escapeHtml(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function applyBoardData(res) {
+      document.getElementById('loadingBox').style.display = 'none';
+      allStores = (res && res.stores) ? res.stores : [];
+      staleThreshold = (res && res.staleThresholdDays) || 180;
+      saveLocalCache(res);
+      updateCounts();
+      resetAndRenderGrid();
+      if (activeStoreName) {
+        const exists = allStores.find(s => s.name === activeStoreName);
+        if (exists && document.getElementById('detailModal').classList.contains('open') && !isEditMode) {
+          openStoreDetail(activeStoreName, false);
+        }
+      }
+    }
+
+    async function loadBoard(forceRefresh) {
+      if (allStores.length === 0) {
+        document.getElementById('loadingBox').style.display = 'block';
+        document.getElementById('storeGrid').innerHTML = '';
+      } else if (forceRefresh) {
+        showToast('🔄 正在從雲端同步最新菜單...');
+      }
+      document.getElementById('emptyBox').style.display = 'none';
+
+      try {
+        const res = await backendFetchBoard(!!forceRefresh);
+        applyBoardData(res);
+        if (forceRefresh) showToast('✅ 已同步雲端最新菜單！');
+      } catch (err) {
+        document.getElementById('loadingBox').style.display = 'none';
+        showToast('❌ 載入失敗：' + (err.message || err), 5000);
+      }
+    }
+
+    function updateCounts() {
+      const foodCnt = allStores.filter(s => s.storeType !== '飲料店').length;
+      const drinkCnt = allStores.filter(s => s.storeType === '飲料店').length;
+      const staleCnt = allStores.filter(s => s.isStale).length;
+
+      document.getElementById('cnt-all').textContent = allStores.length;
+      document.getElementById('cnt-food').textContent = foodCnt;
+      document.getElementById('cnt-drink').textContent = drinkCnt;
+      document.getElementById('cnt-stale').textContent = staleCnt;
+
+      const banner = document.getElementById('staleBanner');
+      if (staleCnt > 0 && currentTab !== 'stale') {
+        banner.style.display = 'flex';
+        document.getElementById('staleBannerText').textContent =
+          `⚠️ 目前有 ${staleCnt} 間店家的菜單超過 ${staleThreshold} 天未核實價格，訂餐前請留意是否漲價！`;
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
+    function setTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      updateCounts();
+      resetAndRenderGrid();
+    }
+
+    function onSearchInput() {
+      const val = document.getElementById('searchInput').value.trim();
+      searchQuery = val.toLowerCase();
+      document.getElementById('clearSearchBtn').style.display = val ? 'block' : 'none';
+      resetAndRenderGrid();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      searchQuery = '';
+      document.getElementById('clearSearchBtn').style.display = 'none';
+      resetAndRenderGrid();
+    }
+
+    function computeFilteredStores() {
+      const sortBy = document.getElementById('sortSelect').value;
+      const list = allStores.filter(st => {
+        if (currentTab === 'food' && st.storeType === '飲料店') return false;
+        if (currentTab === 'drink' && st.storeType !== '飲料店') return false;
+        if (currentTab === 'stale' && !st.isStale) return false;
+
+        if (!searchQuery) return true;
+        if (st.name.toLowerCase().includes(searchQuery)) return true;
+        if (st.phone && st.phone.toLowerCase().includes(searchQuery)) return true;
+        return st.items.some(it =>
+          it.item.toLowerCase().includes(searchQuery) ||
+          (it.category && it.category.toLowerCase().includes(searchQuery))
+        );
+      });
+
+      list.sort((a, b) => {
+        if (sortBy === 'stale') {
+          const da = a.daysAgo == null ? 99999 : a.daysAgo;
+          const db = b.daysAgo == null ? 99999 : b.daysAgo;
+          return db - da;
+        }
+        if (sortBy === 'rating') {
+          return (b.ratingAvg || 0) - (a.ratingAvg || 0);
+        }
+        return a.name.localeCompare(b.name, 'zh-Hant');
+      });
+
+      return list;
+    }
+
+    function resetAndRenderGrid() {
+      const grid = document.getElementById('storeGrid');
+      const emptyBox = document.getElementById('emptyBox');
+      filteredStoresCache = computeFilteredStores();
+      renderedCount = 0;
+      grid.innerHTML = '';
+
+      if (filteredStoresCache.length === 0) {
+        emptyBox.style.display = 'block';
+        return;
+      }
+      emptyBox.style.display = 'none';
+      appendMoreCards();
+    }
+
+    function buildCardHtml(st) {
+      const isDrink = st.storeType === '飲料店';
+      const firstImg = st.images && st.images.length > 0 ? st.images[0] : null;
+      const fallbackThumb = firstImg ? (firstImg.backupPreviewUrl || firstImg.backupImageUrl) : '';
+      const thumbHtml = firstImg
+        ? `<img referrerpolicy="no-referrer" src="${escapeHtml(firstImg.previewUrl)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${escapeHtml(fallbackThumb)}';" alt="${escapeHtml(st.name)}">`
+        : `<div class="no-thumb"><span>${isDrink ? '🥤' : '🍱'}</span><div>尚無菜單圖片（點擊看價目）</div></div>`;
+
+      const photoCountBadge = st.images.length > 0
+        ? `<span class="badge badge-photo-count">🖼️ ${st.images.length} 張圖</span>`
+        : '';
+
+      const ratingHtml = st.ratingAvg
+        ? `<span class="rating-pill">⭐ ${st.ratingAvg} (${st.ratingCount})</span>`
+        : '';
+
+      const phoneHtml = st.phone
+        ? `<a class="phone-link" href="tel:${escapeHtml(st.phone)}" onclick="event.stopPropagation()">☎️ ${escapeHtml(st.phone)}</a>`
+        : `<span>☎️ 未登錄電話</span>`;
+
+      const freshClass = st.isStale ? 'fresh-stale' : 'fresh-ok';
+      const freshLabel = st.verifiedAt
+        ? (st.isStale ? `⚠️ ${st.verifiedAt} (${st.daysAgo}天未核實)` : `✅ ${st.verifiedAt} 已核實`)
+        : '⚠️ 尚無核實日期';
+
+      let previewItems = st.items;
+      if (searchQuery) {
+        const matched = st.items.filter(it => it.item.toLowerCase().includes(searchQuery));
+        if (matched.length > 0) previewItems = matched;
+      }
+      const chipsHtml = previewItems.slice(0, 4).map(it => {
+        const isHit = searchQuery && it.item.toLowerCase().includes(searchQuery);
+        const priceTxt = it.price > 0 ? ` $${it.price}` : '';
+        return `<span class="item-chip ${isHit ? 'highlight' : ''}">${escapeHtml(it.item)}${priceTxt}</span>`;
+      }).join('');
+      const moreCount = st.items.length > 4 ? `<span style="font-size:0.78rem;padding:2px 4px;">+${st.items.length - 4} 項</span>` : '';
+
+      const encodedName = encodeURIComponent(st.name);
+
+      return `
+        <article class="store-card ${st.isStale ? 'is-stale' : ''}" onclick="openStoreByEncoded('${encodedName}')">
+          <div class="card-thumb">
+            ${thumbHtml}
+            <div class="thumb-badges">
+              <span class="badge ${isDrink ? 'badge-drink' : 'badge-food'}">${isDrink ? '🥤 飲料店' : '🍱 一般餐廳'}</span>
+              ${photoCountBadge}
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-title-row">
+              <div class="card-title">${escapeHtml(st.name)}</div>
+              ${ratingHtml}
+            </div>
+            <div class="meta-row">
+              ${phoneHtml}
+              <span>• 共 ${st.items.length} 品項</span>
+            </div>
+            <div class="freshness-bar ${freshClass}">
+              <span>${escapeHtml(freshLabel)}</span>
+            </div>
+            <div class="items-preview">
+              ${chipsHtml || '<span>點擊查看菜單圖片或新增品項</span>'}
+              ${moreCount}
+            </div>
+          </div>
+          <div class="card-footer">
+            <span style="font-size:0.8rem;color:var(--text-muted);">點擊檢視原圖與完整價目</span>
+            ${st.isStale
+              ? `<button class="btn btn-sm btn-success-soft" onclick="quickVerify(event, '${encodedName}')">✅ 已核實最新</button>`
+              : `<span style="font-size:0.78rem;color:var(--green);font-weight:600;">價格有效</span>`
+            }
+          </div>
+        </article>
+      `;
+    }
+
+    function appendMoreCards() {
+      if (renderedCount >= filteredStoresCache.length) return;
+      const slice = filteredStoresCache.slice(renderedCount, renderedCount + PAGE_BATCH_SIZE);
+      renderedCount += slice.length;
+      document.getElementById('storeGrid').insertAdjacentHTML('beforeend', slice.map(buildCardHtml).join(''));
+    }
+
+    function openStoreByEncoded(encodedName) {
+      openStoreDetail(decodeURIComponent(encodedName), false);
+    }
+
+    async function quickVerify(event, encodedName) {
+      if (event) event.stopPropagation();
+      const storeName = decodeURIComponent(encodedName);
+      const btn = event ? event.currentTarget : null;
+      if (btn) { btn.disabled = true; btn.textContent = '核實中...'; }
+
+      try {
+        const res = await backendPostAction('verifyStore', { storeName: storeName });
+        showToast(`✅ 已將【${res.storeName}】標記為今日 (${res.verifiedAt}) 核實無誤！`);
+        const target = allStores.find(s => s.name === storeName);
+        if (target) {
+          target.verifiedAt = res.verifiedAt;
+          target.daysAgo = 0;
+          target.isStale = false;
+          target.statusText = `✅ 最後核實：${res.verifiedAt}（今日最新）`;
+        }
+        saveLocalCache({ ok: true, staleThresholdDays: staleThreshold, stores: allStores });
+        updateCounts();
+        resetAndRenderGrid();
+        if (activeStoreName === storeName && !isEditMode) {
+          openStoreDetail(storeName, false);
+        }
+      } catch (err) {
+        if (btn) { btn.disabled = false; btn.textContent = '✅ 已核實最新'; }
+        showToast('❌ 核實失敗：' + (err.message || err), 4500);
+      }
+    }
+
+    function openStoreDetail(storeName, startInEditMode) {
+      const st = allStores.find(s => s.name === storeName);
+      if (!st) return;
+
+      activeStoreName = storeName;
+      isEditMode = !!startInEditMode;
+      document.getElementById('detailModal').classList.add('open');
+
+      if (isEditMode) {
+        renderStoreEditView(st);
+      } else {
+        renderStoreReadView(st);
+      }
+    }
+
+    function renderStoreReadView(st) {
+      const encodedName = encodeURIComponent(st.name);
+      document.getElementById('detailTitle').textContent = `${st.storeType === '飲料店' ? '🥤' : '🍱'} ${st.name}`;
+
+      let photosHtml = '';
+      if (st.images && st.images.length > 0) {
+        photosHtml = `
+          <div style="margin-bottom:6px;font-size:0.84rem;font-weight:700;color:var(--text-muted);">
+            🖼️ 菜單原圖（點擊圖片可全螢幕放大檢視）
+          </div>
+          <div class="photo-strip">
+            ${st.images.map((img, idx) => `
+              <div class="photo-item">
+                <img referrerpolicy="no-referrer" src="${escapeHtml(img.previewUrl)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${escapeHtml(img.backupPreviewUrl || img.backupImageUrl)}';" onclick="openLightbox('${encodedName}', ${idx})" alt="菜單圖片">
+                <button class="photo-del-btn" title="刪除此張舊圖片" onclick="deleteSinglePhoto(event, '${escapeHtml(img.id)}', '${encodedName}')">🗑️ 刪圖</button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      const statusBg = st.isStale ? 'background:#fef2f2;border:1px solid #fecaca;color:#991b1b;' : 'background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;';
+      const googleSearchUrl = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(st.name + ' 菜單 價格');
+
+      const groups = {};
+      st.items.forEach(it => {
+        const cat = it.category || '一般品項';
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(it);
+      });
+
+      const categoriesHtml = Object.keys(groups).length > 0
+        ? Object.entries(groups).map(([cat, items]) => `
+            <div class="category-group">
+              <div class="category-title">${escapeHtml(cat)} (${items.length})</div>
+              <div class="menu-items-grid">
+                ${items.map(it => {
+                  const hit = searchQuery && it.item.toLowerCase().includes(searchQuery);
+                  return `
+                    <div class="menu-row ${hit ? 'match' : ''}">
+                      <span>${escapeHtml(it.item)}</span>
+                      <span class="menu-price">${it.price > 0 ? '$' + it.price : '未標價'}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `).join('')
+        : `<p style="color:var(--text-muted);padding:20px 0;">目前尚無數位化品項，可點擊下方「📸 上傳新菜單圖」讓 AI 自動建檔，或按「✏️ 修改價目」手動新增。</p>`;
+
+      document.getElementById('detailBody').innerHTML = `
+        <div class="detail-status-bar" style="${statusBg}">
+          <div>
+            <div style="font-weight:700;">${escapeHtml(st.statusText)}</div>
+            <div style="font-size:0.82rem;margin-top:3px;">
+              ☎️ 電話：${st.phone ? `<a class="phone-link" href="tel:${escapeHtml(st.phone)}">${escapeHtml(st.phone)}</a>` : '未設定'}
+              ${st.ratingAvg ? ` ｜ ⭐ 評價：${st.ratingAvg} 分 (${st.ratingCount} 人)` : ''}
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a class="btn btn-sm btn-outline" href="${googleSearchUrl}" target="_blank" rel="noopener">🔍 Google 查最新菜單圖</a>
+            <button class="btn btn-sm btn-success" onclick="quickVerify(event, '${encodedName}')">✅ 確認今日價格無誤</button>
+          </div>
+        </div>
+        ${photosHtml}
+        ${categoriesHtml}
+      `;
+
+      document.getElementById('detailFooter').innerHTML = `
+        <button class="btn btn-sm btn-danger-soft" onclick="confirmDeleteStore('${encodedName}')">🗑️ 刪除整間店家</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-sm btn-outline" onclick="openUploadForStore('${encodedName}')">📸 上傳新菜單圖</button>
+          <button class="btn btn-sm btn-primary" onclick="openStoreDetail(decodeURIComponent('${encodedName}'), true)">✏️ 修改價目 / 店家資訊</button>
+        </div>
+      `;
+    }
+
+    function renderStoreEditView(st) {
+      document.getElementById('detailTitle').textContent = `✏️ 編輯菜單：${st.name}`;
+      editItemsDraft = st.items.length > 0
+        ? st.items.map(it => ({ item: it.item, price: it.price, category: it.category || '' }))
+        : [{ item: '', price: 0, category: '主餐' }];
+
+      document.getElementById('detailBody').innerHTML = `
+        <div class="form-grid">
+          <div class="field">
+            <label>店家名稱</label>
+            <input type="text" id="editStoreName" value="${escapeHtml(st.name)}">
+          </div>
+          <div class="field">
+            <label>店家類型</label>
+            <select id="editStoreType">
+              <option value="一般餐廳" ${st.storeType !== '飲料店' ? 'selected' : ''}>🍱 一般餐廳</option>
+              <option value="飲料店" ${st.storeType === '飲料店' ? 'selected' : ''}>🥤 飲料店</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>訂購電話</label>
+            <input type="text" id="editStorePhone" value="${escapeHtml(st.phone)}" placeholder="例如：06-2345678">
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px;">
+          <strong style="font-size:0.92rem;">📋 品項與價格明細</strong>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-sm btn-outline" onclick="batchAdjustPrice(5)">全品項 +$5</button>
+            <button class="btn btn-sm btn-outline" onclick="addEditRow()">➕ 新增品項</button>
+          </div>
+        </div>
+
+        <table class="edit-table">
+          <thead>
+            <tr>
+              <th style="width:44%;">品項名稱</th>
+              <th style="width:22%;">價格 ($)</th>
+              <th style="width:26%;">分類</th>
+              <th style="width:8%;"></th>
+            </tr>
+          </thead>
+          <tbody id="editRowsBody"></tbody>
+        </table>
+      `;
+
+      renderEditRows();
+
+      const encodedName = encodeURIComponent(st.name);
+      document.getElementById('detailFooter').innerHTML = `
+        <button class="btn btn-outline" onclick="openStoreDetail(decodeURIComponent('${encodedName}'), false)">取消返回</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="addEditRow()">➕ 新增一列</button>
+          <button class="btn btn-primary" id="saveEditBtn" onclick="saveStoreEdits('${encodedName}')">💾 儲存變更並標記今日核實</button>
+        </div>
+      `;
+    }
+
+    function syncDraftFromDom() {
+      const rows = document.querySelectorAll('#editRowsBody tr');
+      if (rows.length === 0) return;
+      editItemsDraft = Array.from(rows).map(tr => ({
+        item: tr.querySelector('.inp-item').value,
+        price: parseInt(tr.querySelector('.inp-price').value, 10) || 0,
+        category: tr.querySelector('.inp-cat').value
+      }));
+    }
+
+    function renderEditRows() {
+      const tbody = document.getElementById('editRowsBody');
+      tbody.innerHTML = editItemsDraft.map((row, idx) => `
+        <tr>
+          <td><input class="inp-item" type="text" value="${escapeHtml(row.item)}" placeholder="品項名稱"></td>
+          <td><input class="inp-price" type="number" min="0" value="${row.price}"></td>
+          <td><input class="inp-cat" type="text" value="${escapeHtml(row.category)}" placeholder="分類"></td>
+          <td><button class="btn btn-sm btn-danger-soft" onclick="removeEditRow(${idx})">✕</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function addEditRow() {
+      syncDraftFromDom();
+      editItemsDraft.push({ item: '', price: 0, category: '' });
+      renderEditRows();
+      const inputs = document.querySelectorAll('#editRowsBody .inp-item');
+      if (inputs.length > 0) inputs[inputs.length - 1].focus();
+    }
+
+    function removeEditRow(idx) {
+      syncDraftFromDom();
+      editItemsDraft.splice(idx, 1);
+      if (editItemsDraft.length === 0) editItemsDraft.push({ item: '', price: 0, category: '' });
+      renderEditRows();
+    }
+
+    function batchAdjustPrice(delta) {
+      syncDraftFromDom();
+      editItemsDraft = editItemsDraft.map(r => ({
+        ...r,
+        price: r.price > 0 ? Math.max(0, r.price + delta) : 0
+      }));
+      renderEditRows();
+      showToast(`已預覽將所有標價品項 +$${delta}，確認無誤請按「儲存變更」！`);
+    }
+
+    async function saveStoreEdits(encodedOriginalName) {
+      syncDraftFromDom();
+      const originalName = decodeURIComponent(encodedOriginalName);
+      const newName = document.getElementById('editStoreName').value.trim();
+      const storeType = document.getElementById('editStoreType').value;
+      const phone = document.getElementById('editStorePhone').value.trim();
+
+      if (!newName) { showToast('❌ 店家名稱不能空白！'); return; }
+      const validItems = editItemsDraft.filter(r => r.item.trim() !== '');
+      if (validItems.length === 0) { showToast('❌ 請至少填寫 1 個有效品項！'); return; }
+
+      const btn = document.getElementById('saveEditBtn');
+      btn.disabled = true;
+      btn.textContent = '儲存中...';
+
+      try {
+        const res = await backendPostAction('saveStoreMenu', {
+          originalName: originalName,
+          newName: newName,
+          storeType: storeType,
+          phone: phone,
+          items: validItems
+        });
+        showToast(`✅ 已儲存【${res.storeName}】共 ${res.count} 項並標記今日核實！`);
+        activeStoreName = res.storeName;
+        isEditMode = false;
+        if (res.board) applyBoardData(res.board);
+        else await loadBoard(true);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = '💾 儲存變更並標記今日核實';
+        showToast('❌ 儲存失敗：' + (err.message || err), 5000);
+      }
+    }
+
+    async function confirmDeleteStore(encodedName) {
+      const storeName = decodeURIComponent(encodedName);
+      const ok = confirm(`確定要刪除【${storeName}】的所有菜單資料與雲端硬碟菜單圖片嗎？\n（圖片會移至雲端硬碟垃圾桶，可救回）`);
+      if (!ok) return;
+
+      showToast(`🗑️ 正在刪除【${storeName}】...`);
+      try {
+        const res = await backendPostAction('deleteStore', { storeName: storeName, trashImages: true });
+        closeModal('detailModal');
+        activeStoreName = null;
+        showToast(`🗑️ 已刪除【${res.storeName}】(${res.deletedRows} 筆品項、${res.trashedFiles} 張圖片)`);
+        if (res.board) applyBoardData(res.board);
+        else await loadBoard(true);
+      } catch (err) {
+        showToast('❌ 刪除失敗：' + (err.message || err), 5000);
+      }
+    }
+
+    async function deleteSinglePhoto(event, fileId, encodedName) {
+      event.stopPropagation();
+      if (!confirm('確定要把這張舊菜單圖片移至雲端硬碟垃圾桶嗎？')) return;
+
+      showToast('🗑️ 正在移除圖片...');
+      try {
+        const res = await backendPostAction('deleteDriveImage', { fileId: fileId });
+        showToast('✅ 已移除舊圖片！');
+        activeStoreName = decodeURIComponent(encodedName);
+        if (res && res.board) applyBoardData(res.board);
+        else await loadBoard(true);
+      } catch (err) {
+        showToast('❌ 移除圖片失敗：' + (err.message || err), 4500);
+      }
+    }
+
+    function openUploadModal(prefillStoreName = '') {
+      selectedImageBase64 = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('uploadPreview').style.display = 'none';
+      document.getElementById('uploadStoreName').value = prefillStoreName;
+      document.getElementById('manualStoreName').value = prefillStoreName;
+      document.getElementById('manualStorePhone').value = '';
+      document.getElementById('uploadHint').textContent = '';
+      switchUploadMode('photo');
+      document.getElementById('uploadModal').classList.add('open');
+    }
+
+    function openUploadForStore(encodedName) {
+      closeModal('detailModal');
+      openUploadModal(decodeURIComponent(encodedName));
+    }
+
+    function switchUploadMode(mode) {
+      uploadPaneMode = mode;
+      document.getElementById('uploadPhotoPane').style.display = mode === 'photo' ? 'block' : 'none';
+      document.getElementById('uploadManualPane').style.display = mode === 'manual' ? 'block' : 'none';
+      document.getElementById('upTabPhoto').className = mode === 'photo' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+      document.getElementById('upTabManual').className = mode === 'manual' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+      document.getElementById('uploadSubmitBtn').textContent = mode === 'photo' ? '開始上傳處理' : '建立店家並編輯品項';
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      document.getElementById('uploadHint').textContent = '正在壓縮最佳化圖片...';
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const maxDim = 1800;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.86);
+          selectedImageBase64 = dataUrl.split(',')[1];
+          selectedImageMime = 'image/jpeg';
+
+          const preview = document.getElementById('uploadPreview');
+          preview.src = dataUrl;
+          preview.style.display = 'inline-block';
+          document.getElementById('uploadHint').textContent = `已就緒 (${w}×${h})`;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function submitUploadModal() {
+      if (uploadPaneMode === 'manual') {
+        const name = document.getElementById('manualStoreName').value.trim();
+        const type = document.getElementById('manualStoreType').value;
+        const phone = document.getElementById('manualStorePhone').value.trim();
+        if (!name) { showToast('❌ 請輸入店家名稱！'); return; }
+
+        let existing = allStores.find(s => s.name === name);
+        if (!existing) {
+          existing = {
+            name: name,
+            storeType: type,
+            phone: phone,
+            ratingAvg: null,
+            ratingCount: 0,
+            verifiedAt: '',
+            daysAgo: 0,
+            isStale: false,
+            statusText: '',
+            items: [{ item: '', price: 0, category: '主餐' }],
+            images: []
+          };
+          allStores.push(existing);
+        }
+        closeModal('uploadModal');
+        openStoreDetail(name, true);
+        return;
+      }
+
+      if (!selectedImageBase64) {
+        showToast('❌ 請先選擇一張菜單照片！');
+        return;
+      }
+
+      const storeName = document.getElementById('uploadStoreName').value.trim();
+      const mode = document.querySelector('input[name="uploadActionMode"]:checked').value;
+      const btn = document.getElementById('uploadSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = mode === 'image_only' ? '上傳雲端硬碟中...' : '🤖 AI 辨識菜單中 (約 8~15 秒)...';
+
+      try {
+        const res = await backendPostAction('uploadMenuImage', {
+          base64Data: selectedImageBase64,
+          mimeType: selectedImageMime,
+          storeName: storeName,
+          mode: mode
+        });
+        btn.disabled = false;
+        btn.textContent = '開始上傳處理';
+        closeModal('uploadModal');
+        activeStoreName = res.storeName;
+        const msg = mode === 'image_only'
+          ? `✅ 已上傳【${res.storeName}】菜單照片並標記今日核實！`
+          : `✅ AI 已完成【${res.storeName}】辨識（存入 ${res.itemCount} 項，核實日 ${res.verifiedAt}）！`;
+        showToast(msg, 4500);
+        if (res.board) applyBoardData(res.board);
+        else await loadBoard(true);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = '開始上傳處理';
+        showToast('❌ 上傳失敗：' + (err.message || err), 5500);
+      }
+    }
+
+    function openLightbox(encodedName, index) {
+      const storeName = decodeURIComponent(encodedName);
+      const st = allStores.find(s => s.name === storeName);
+      if (!st || !st.images || st.images.length === 0) return;
+      lbImages = st.images;
+      lbIndex = index || 0;
+      updateLightboxView();
+      document.getElementById('lightbox').classList.add('open');
+    }
+
+    function updateLightboxView() {
+      const img = lbImages[lbIndex];
+      const imgEl = document.getElementById('lightboxImg');
+      imgEl.onerror = function() { this.onerror = null; this.src = img.backupImageUrl; };
+      imgEl.src = img.imageUrl;
+      document.getElementById('lbCaption').textContent = `${img.title} (${lbIndex + 1} / ${lbImages.length})`;
+      document.getElementById('lbPrevBtn').style.display = lbImages.length > 1 ? 'inline-flex' : 'none';
+      document.getElementById('lbNextBtn').style.display = lbImages.length > 1 ? 'inline-flex' : 'none';
+    }
+
+    function stepLightbox(dir) {
+      lbIndex = (lbIndex + dir + lbImages.length) % lbImages.length;
+      updateLightboxView();
+    }
+
+    function closeLightbox(event) {
+      if (event.target.id === 'lightbox') {
+        document.getElementById('lightbox').classList.remove('open');
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function backdropClose(event, id) {
+      if (event.target.id === id) closeModal(id);
+    }
+  </script>
+</body>
+</html>
